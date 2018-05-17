@@ -1,1 +1,2 @@
-## Read Me
+## knn 
+## k nearest neighbors algorithm with 
