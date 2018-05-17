@@ -1,2 +1,2 @@
 ## knn 
-## k nearest neighbors algorithm with 
+# k nearest neighbors algorithm with Auto.csv file
