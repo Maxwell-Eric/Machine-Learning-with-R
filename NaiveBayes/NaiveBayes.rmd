@@ -1,0 +1,46 @@
+#Load libraries
+library(tm)
+library(wordcloud)
+library(e1071)
+library(gmodels)
+
+#Define clean function
+clean <- function(x) {tm_map(tm_map(tm_map(tm_map(tm_map(tm_map(x,content_transformer(tolower)), removeNumbers), removeWords, stopwords()), removePunctuation), stemDocument), stripWhitespace)}
+
+#Define finalize_data function
+finalize_data <- function(x){dtm <- DocumentTermMatrix(x); word_freq <- findFreqTerms(dtm,5); dtm_freq <- dtm[ , word_freq]; return (apply(dtm_freq, MARGIN = 2, function(x){x <- ifelse(x>0, "Yes", "No")}))}
+
+#Create corpus sets
+train_spam_corpus <- VCorpus(DirSource("train/spam"))
+train_ham_corpus <- VCorpus(DirSource("train/ham"))
+test_spam_corpus <- VCorpus(DirSource("test/spam"))
+test_ham_corpus <- VCorpus(DirSource("test/ham"))
+
+#Create train_set label vector
+train_type <- factor(c(rep("spam", length(train_spam_corpus)), rep("ham", length(train_ham_corpus))))
+
+#Create test_set label vector
+test_type <- factor(c(rep("spam", length(test_spam_corpus)), rep("ham", length(test_ham_corpus))))
+
+#Clean training_spam and training_ham corpuses
+train_spam_corups_clean <- clean(train_spam_corpus)
+train_ham_corpus_clean <- clean(train_ham_corpus)
+
+#Create training spam and ham wordclouds
+wordcloud(train_spam_corups_clean, min.freq = 20, random.order = FALSE)
+wordcloud(train_ham_corpus_clean, min.freq = 50, random.order = FALSE)
+
+#Finish preping the train set with finalize_data function
+train_set <- finalize_data(c(train_spam_corups_clean, train_ham_corpus_clean))
+
+#Create classifier
+spam_classifier <- naiveBayes(train_set, train_type)
+
+#Prep test set data with clean and finalize_data functions
+test_set <- finalize_data(clean(c(test_spam_corpus, test_ham_corpus)))
+
+#Predict test set with classifier
+test_predictions <- predict(spam_classifier, test_set)
+
+#Create cross table to analyze results
+CrossTable(test_predictions, test_type, prop.chisq = FALSE, prop.t = FALSE, dnn=c("Predictions", "Actual"))
