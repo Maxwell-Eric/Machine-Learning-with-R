@@ -1,0 +1,62 @@
+#Load data set
+houses <- read.csv("Boston.csv")
+
+#Display house value summary, boxplot, histogram
+summary(houses$medv)
+boxplot(houses$medv)
+hist(houses$medv)
+
+#Find number of neighborhoods with houses that have a median value of 50
+length(houses$X[which(houses$medv == 50)])
+
+
+#Display crime rate summary, boxplot, histogram
+summary(houses$crim)
+boxplot(houses$crim)
+hist(houses$crim, breaks = 100)
+
+#Find number of neighborhoods with a crime rate less than 0.02
+length(houses$X[which(houses$crim < 0.02)])
+
+
+#Display pupil-teacher ratio summary, boxplot, and histogram
+summary(houses$ptratio)
+boxplot(houses$ptratio)
+hist(houses$ptratio)
+
+#Find number of neighborhoods with a pupil-teacher ratio less than 13.2
+length(houses$X[which(houses$ptratio < 13.2)])
+
+
+#Display neighborhoods with low crime, low pupil-teacher ratio and high median value
+houses$X[which(houses$crim<=1 & houses$ptratio <= 15 & houses$medv >= 40)]
+
+
+#Display the number of neighborhoods bordered by the Charles
+table(houses$chas == 1)
+
+
+#Create linear regresssion model using all variables
+model_1 <- lm(medv ~ ., data = houses)
+summary(model_1)
+
+
+#Create 2nd linear model with significant variables
+model_2 <- lm(medv ~ crim+zn+chas+nox+rm+dis+rad+tax+ptratio+black+lstat, data = houses)
+summary(model_2)
+
+
+#Display correlation and scatter matrix for model_2 variables
+library(psych)
+pairs.panels(houses[c("medv", "crim", "zn", "chas", "nox", "rm", "dis", "rad", "tax", "ptratio", "black", "lstat")])
+
+
+#Create non-inear variables lstat^-1 and (lstat^-1 * rm)^(1/2) then view scatter and correlation with medv
+houses$ln1 <- houses$lstat^-1
+houses$ln1r_rt <- (houses$ln1* houses$rm)^(1/2)
+pairs.panels(houses[c("ln1r_rt","rm","tax", "medv")])
+
+
+#Create final model using 
+best_model<- lm(medv ~ ln1r_rt*rm*tax -rm -rm:tax, data = houses)
+summary(best_model)

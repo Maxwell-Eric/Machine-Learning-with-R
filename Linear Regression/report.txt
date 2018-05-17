@@ -1,0 +1,23 @@
+2.	The median house value (in the 1000’s) for the neighborhoods ranges from 5.00 to 50.00. The quartiles are Q1 = 17.02, Median = 21.20, Q3 = 25.00. The mean is 22.53. Viewing the scatterplot, many neighborhoods seem to have houses which are outliers on the expensive side. There are 16 (3.16%) neighborhoods with a median value of 50.00 and none with a value greater than 50.00. This may indicate this was a censored value. 
+
+The crime rate ranges from 0.00632 to 88.98 with Q1 = 0.0820, Median = 0.257, Q3 = 3.68 and a mean of 3.61. With a mean much bigger than the median, it is apparent the data is right skewed. The histogram shows this and the quartile values indicate this as well. The Q1 value of 0.082 seems quite low. Several neighborhoods seem to have a low crime rate. There are 17 (3.36%) neighborhoods with a crime rate of 0.02 or below. 
+
+The pupil-teacher ratio ranges from 12.6 to 22.0 with Q1 = 17.4, Median = 19.1, Q3 = 20.2 and a mean of 18.5. The box plot shows outliers on the low end. There are 15 neighborhoods with a pupil-teacher ratio of 13.2, which is the border for the outliers using Q1 – 1.5*IQR.
+
+To find the neighborhoods with high home values, low crime rates and low teacher-pupil ratios, home values greater than or equal to 40 will be used, crime rates of 1 or lower, and a teacher-pupil ratio of 15 or less will be used. Thsese neighborhoods are 196 203 204 205 258 262 263 268 269 281 283 284.
+
+
+3.	There are 35 suburbs bound by the Charles river. This is 6.92% of the suburbs.
+
+
+4.	The statistically significant variables are crime rate, zn, 
+chas, nox, rm, dis, rad, tax, ptratio, black and lstat. 
+
+
+6.	The first model’s residuals range from -15.9 to 26.1 with Q1 = -2.76, Median = -0.466 and Q3 = 1.80. Although the min and max seem large, these are outliers. The IQR is 4.56, which means that number lower than -9.6 and greater than 8.64 are outliers. The median is negative and Q1 has a larger magnitude than Q3. These numbers indicate a right skew. The R-squared score is 0.74. This means that 74% of the model’s variance is explained, while 26% is unexplained. The F-statistic is 100.6 on 14 and 491 DF with p < 2.2 e -16. This indicates that the model is significant. 
+
+The second model’s residuals range from -15.6 to 26.2 with Q1 = -2.74, Median = -0.505, and Q3 = 1.73. The IQR is 4.47. The negative mean and Q1 having a larger magnitude than Q3 indicate a right skew. The R-squared score is 0.74. This means 74% of the variance is explained leaving 26% unexplained. The F-statistic is 128.2 on 11 and 494 DF with p < 2.2e -16. This indicates the model is significant. 
+
+8. The variables lstat, rm, ptratio and tax have the highest correlation with medv. Several combinations and non-linearities were tried with these variables. Lstat^-1 was found to have a better correlation than lstat. In addition, the non-linear variable (lstat^-1 * rm)^(1/2), which I will call ln1r_rt, had an even better correlation. Although ptratio had a higher correlation than tax, it did not help the model. 
+
+The best model I found when considering R-squared and F-statistic used the variables ln1r_rt, tax, ln1r_rt:rm, ln1r_rt:tax, ln1r_rt:rm:tax.  It had an R-squared score of .8396, which explains 84% of the variation, and an F-statistic score of 523.5 on 5 and DF 500 with p < 2.2 e-16. These are significant improvements over the original model. Better R-squared scores were achieved with more variable combinations and more nonlinearities. However, many or all the coefficients were not significant and the F-statistic scores were much worse. This lead me to believe these scores would not generalize well and were most likely over fit to the data set.
