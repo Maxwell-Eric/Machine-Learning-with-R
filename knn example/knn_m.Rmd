@@ -1,0 +1,64 @@
+---
+title: "KNN"
+author: "Eric Maxwell"
+date: "October 27, 2017"
+output: html_document
+---
+
+#1
+auto <- read.csv("auto.csv", stringsAsFactors = FALSE)
+
+#2
+str(auto)
+
+#3
+auto$horsepower <- as.integer(auto$horsepower)
+
+#4
+auto <- auto[!is.na(auto$horsepower),]
+
+#5
+pairs(~auto$mpg+auto$cylinders+auto$displacement+auto$horsepower+auto$weight+auto$acceleration+auto$year+auto$origin)
+
+#6
+mpg_median <- median(auto$mpg)
+mpg1 <- sapply(auto$mpg, function(x) {if (x > mpg_median) 1 else 0})
+
+#7
+auto <- auto[,c(2,3,4,5,6,7)]
+
+#8
+set.seed(1)
+
+#9
+auto_n <- as.data.frame(lapply(auto[,], function(x) {return ((x-min(x))/(max(x)-min(x)))}))
+
+#10
+train_sample <- sample(392,292)
+
+#11
+train_set <- function (x) {auto_n[train_sample, x]}
+test_set <- function (x) {auto_n[-train_sample, x]}
+
+#12
+library(class)
+
+#Pass the find_k function a vector of attributes to include. It will iterate through odd values of k from 1 to 103 and return best k value and percent correctly classified.
+
+find_k <- function(x) {best_score <- 0; k <- 1; while (k<102) {score <- sum(mpg1[-train_sample] == knn(train=train_set(x), cl=mpg1[train_sample], test=test_set(x),k)); if (score >= best_score) {best_score <- score; best_k <- k};k <- k+2}; return (c(best_k, best_score))}
+
+#Create all possible subsets of included attribures.
+library(combinat)
+attribute_sets <- lapply(1:6, function(x) {combn(6,x)})
+
+#Pass all subsets to find_k function. Print i, k, and number correct.
+i <- 1; while (i<16) {print(i); print(find_k(attribute_sets[[2]][,i])); i <- i+1}
+i <- 1; while (i<21) {print(i); print(find_k(attribute_sets[[3]][,i])); i <- i+1}
+i <- 1; while (i<16) {print(i); print(find_k(attribute_sets[[4]][,i])); i <- i+1}
+i <- 1; while (i<7) {print(i); print(find_k(attribute_sets[[5]][,i])); i <- i+1}
+print(find_k(attribute_sets[[6]]))
+
+#Check errors for attributes cylinders, displacement, acceleration, and year with k = 7
+library(gmodels)
+CrossTable(x=mpg1[-train_sample], y=knn(train=train_set(c(1,2,5,6)), cl=mpg1[train_sample], test=test_set(c(1,2,5,6)), k=7), prop.chisq = FALSE)
+
