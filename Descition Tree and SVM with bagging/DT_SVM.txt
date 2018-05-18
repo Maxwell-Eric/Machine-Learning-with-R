@@ -1,0 +1,114 @@
+#load libraries
+library(lattice)
+library(ggplot2)
+library(caret)
+library(iterators)
+library(e1071)
+library(lpSolve)
+library(irr)
+library(C50)
+library(kernlab)
+library(randomForest)
+library(party)
+library(coin)
+
+#set seed
+set.seed(123)
+
+#import 
+votes<- read.csv("house-votes.txt", header=FALSE)
+names(votes) <- c("class", "hi", "wpcs", "aotbr", "pff", "esa", "rgis", "astb", "atnc", "mm", "i", "scc", "es", "srts", "c", "dfe", "eaasa")
+
+#Function which gets the most popular vote by party
+get_mode <- function(x){tab <- table(x); tab_max <- max(tab); m <- names(tab)[tab == tab_max]; ifelse(m =="n", return(2), return(3))}
+
+#Fucntion which imputes the missing values with the most popular vote by party
+imp <- function(x) {factor(ifelse(x=="?", get_mode(x), x), labels = c("n","y"))}
+
+#Separate the democrats into a separate database
+dem_votes <- votes[which(votes$class == "democrat"),]
+#Impute missing votes with most popular vote 
+dem_votes_i <- as.data.frame(lapply(dem_votes[-1], imp))
+#Add the democrat class back to the dataframe
+dem_votes_i$class = dem_votes$class
+
+#Separate the republicans into a separate database
+rep_votes <- votes[which(votes$class == "republican"),]
+#Impute missing votes with most popular vote
+rep_votes_i <- as.data.frame(lapply(rep_votes[-1], imp))
+#Add the republican class back to the dataframe
+rep_votes_i$class <- rep_votes$class
+
+#Combine the democrat and republican data frames 
+votes_i <- rbind(rep_votes_i, dem_votes_i)
+#Create a training set for hold-out method
+train_set <- sample(435, 335)
+
+#Create a decision tree with hold out
+mC50 <- C5.0(votes_i[train_set,-17], votes_i[train_set,17])
+#Display the confusion matrix
+confusionMatrix(predict(mC50, votes_i[-train_set,-17]), votes_i[-train_set,17])
+
+#Create an SVM with hold out
+msvm <- ksvm(class ~., votes_i[train_set,])
+#Display the confustion matrix
+confusionMatrix(predict(msvm, votes_i[-train_set,-17]), votes_i[-train_set,17])
+
+#Create folds for 10-Fold cross validation
+folds <- createFolds(votes_i$class, k=10)
+
+#Calculate accuracy for the decision tree with 10-Fold cross validation
+cv_c50_accuracy <- lapply(folds, function(x) {train_s <- votes_i[-x,]; test_s <- votes_i[x,];C50m <- C5.0(class ~., data = train_s);pred <- predict(C50m, test_s); acc <- sum(pred == test_s$class)/(length(pred)); return(acc)})
+
+#Calculate kappa for the decision tree with 10-Fold cross validation
+cv_c50_kappa <- lapply(folds, function(x) {train_s <- votes_i[-x,]; test_s <- votes_i[x,];C50m <- C5.0(class ~., data = train_s);pred <- predict(C50m, test_s); return (kappa2(data.frame(test_s$class, pred))$value)})
+
+#Display decision tree mean scores for accuracy and kappa for 10-Fold cross validation
+mean(unlist(cv_c50_accuracy))
+mean(unlist(cv_c50_kappa))
+
+#Calculate accuracy for the SVM with 10-Fold cross validation
+cv_svm_accuracy <- lapply(folds, function(x) {train_s <- votes_i[-x,]; test_s <- votes_i[x,];svm <- ksvm(class ~., data = train_s);pred <- predict(svm, test_s); acc <- sum(pred == test_s$class)/(length(pred)); return(acc)})
+
+#Calculate kappa score for the SVM with 10-Fold cross validation
+cv_svm_kappa <- lapply(folds, function(x) {train_s <- votes_i[-x,]; test_s <- votes_i[x,];svm <- ksvm(class ~., data = train_s);pred <- predict(svm, test_s);return (kappa2(data.frame(test_s$class, pred))$value)})
+
+#Display SVM mean scores for accuracy and kappa with 10-Fold cross validation
+mean(unlist(cv_svm_accuracy))
+mean(unlist(cv_svm_kappa))
+
+#Create train control object with 10-Fold cross validation
+ctrl <- trainControl(method = "cv", number = 10)
+
+#Create decision tree with caret package with auto tuning parameters
+set.seed(123)
+modelc50 <- train(class ~., data = votes_i, method="C5.0", trControl=ctrl)
+modelc50
+
+#Create SVM with caret package with auto tuning parameters
+set.seed(123)
+modelsvm <- train(class ~., data=votes_i, method="svmLinear", trControl=ctrl)
+modelsvm
+
+#Create svmBag$pred fucntion.
+predfunct<-function (object, x){if (is.character(lev(object))){out <- predict(object, as.matrix(x), type = "probabilities"); colnames(out) <- lev(object); rownames(out) <- NULL} else {out <- predict(object, as.matrix(x))[, 1]};out}
+#Create bagControl for the SVM model
+bagctrlsvm <- bagControl(fit = svmBag$fit, predict=predfunct, aggregate = svmBag$aggregate)
+
+#Create bagged svm model
+set.seed(123)
+svmbag <- train(class ~., data = votes_i, method = "bag", trControl = ctrl, bagControl=bagctrlsvm)
+
+#Display model results
+svmbag
+
+#Create bagControl for the decision tree
+bagctrlctree <- bagControl(fit = ctreeBag$fit, predict = ctreeBag$pred, aggregate = ctreeBag$aggregate)
+
+#Create bagged decision tree model
+set.seed(123)
+ctreebag <- train(class ~., data = votes_i, method = "bag", trControl = ctrl, bagControl=bagctrlctree)
+
+#Display model results
+ctreebag
+
