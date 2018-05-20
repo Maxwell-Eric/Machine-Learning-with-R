@@ -24,7 +24,7 @@ VI.	Conclusion
  	                                  SVM	 	              Decision Tree
  	                             Accuracy	Kappa	 	       Accuracy	Kappa
 Hold-out                        96.0% 0.919           97.0%     0.937
-CV	                            96.3%	0.919	 	        97.0%     0.938	 	 
+CV                              96.3% 0.919           97.0%     0.938	 	 
 Caret with auto-tune and CV	    96.6%	0.928	        	97.5%     0.947
 Bagged ensemble                 96.1% 0.918           96.3%     0.924
 
