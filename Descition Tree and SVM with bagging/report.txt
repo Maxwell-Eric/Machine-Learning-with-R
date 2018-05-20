@@ -23,7 +23,7 @@ The support vector machine bagged model had an accuracy of 96.1% with a kappa of
 VI.	Conclusion
  	                                  SVM	 	              Decision Tree
  	                             Accuracy	Kappa	 	       Accuracy	Kappa
-Hold-out	                      96%	    0.919           97%     0.937
+Hold-out                        96%     0.919           97%     0.937
 CV	                            96.30%	0.919	 	        97%     0.938	 	 
 Caret with auto-tune and CV	    96.60%	0.928	        	97.50%  0.947
 Bagged ensemble                 96.10%  0.918           96.30%  0.924
