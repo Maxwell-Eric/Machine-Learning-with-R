@@ -21,14 +21,14 @@ The bagging ensemble method was used for both the decision tree and the support 
 The support vector machine bagged model had an accuracy of 96.1% with a kappa of 0.918, while the ctreebag had an accuracy of 96.3% and a kappa score of 0.924.
 
 VI.	Conclusion
- 	           SVM	 	        Decision Tree
- 	        Accuracy	Kappa	 	Accuracy	Kappa
-Hold-out	  96%	    0.919	 	  97%	    0.937
-CV	        96.30%	0.919	 	  97%	    0.938
+ 	                                  SVM	 	              Decision Tree
+ 	                             Accuracy	Kappa	 	       Accuracy	Kappa
+Hold-out	                      96%	    0.919	 	        97%	    0.937
+CV	                            96.30%	0.919	 	        97%	    0.938
  	 	 	 	 	 
-Caret with auto-tune and CV	96.60%	0.928	 	97.50%	0.947
+Caret with auto-tune and CV	    96.60%	0.928	        	97.50%	0.947
  	 
-Bagged ensemble	96.10%	0.918	 	96.30%	0.924
+Bagged ensemble	                96.10%	0.918	 	        96.30%	0.924
 
 The SVM had 96% accuracy with a kappa value of 0.919 for the hold out method. Next the SVM was tested with a 10-Fold cross validation. The results where nearly identical to the hold out method. After that, a SVM model was created with the caret package using auto-tuning parameters. This model produced an accuracy of 96.6% with a kappa value of 0.928. This was the model that produced the best results for the SVM models. 
 The SVM bagged model yielded results of 96.1% with a kappa score of 0.918. The bagged model results were a bit surprising. I thought the bagged ensemble would produce better results, however they were in line with the rest of the SVM models.
