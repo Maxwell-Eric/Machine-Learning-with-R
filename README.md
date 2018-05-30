@@ -1,1 +1,1 @@
-# Macnine Learning Projects with R and R Studio
+# Machine Learning Projects with R and R Studio
