@@ -1,2 +1,1 @@
-# R
-R code
+# Macnine Learning Projects with R and R Studio
